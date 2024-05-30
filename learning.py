@@ -4,19 +4,20 @@ from matplotlib import pyplot as plt
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+import math
+
 
 # Loading data from CSV file
 def readData():
-    inputs = []     # Inputs (joint angles q1 to q7)
-    outputs = []    # Outputs (positions x, y, z and orientations alpha, beta, gamma)
+    inputs = []     # Inputs (positions x, y, z and orientations alpha, beta, gamma)
+    outputs = []    # Outputs (joint angles q1 to q7)
 
     with open('panda_random_data.csv', mode='r') as file:
         reader = csv.reader(file)
         next(reader)  # Skip header
         for row in reader:
-            inputs.append([float(angle) for angle in row[:7]])  # Add inputs (joint angles)
-            outputs.append([float(coord) for coord in row[7:]])  # Add outputs (positions and orientations)
-            print(outputs)
+            inputs.append([float(coord) for coord in row[7:]])   # Add inputs (positions and orientations)
+            outputs.append([float(angle) for angle in row[:7]])  # Add outputs (joint angles)
     return np.array(inputs), np.array(outputs)
 
 # Loading and preparing data
@@ -36,23 +37,26 @@ y_test_scaled = scaler_y.transform(y_test)
 
 # Define neural network architecture
 model = tf.keras.Sequential([
-    tf.keras.layers.Dense(256, activation='relu', input_shape=(7,)),   # 7 inputs (q1 to q7)
-    tf.keras.layers.Dense(512, activation='relu'),
-    tf.keras.layers.Dense(512, activation='relu'),
+    tf.keras.layers.Dense(256, activation='relu', input_shape=(6,)),   # 6 inputs (positions and orientations)
     tf.keras.layers.Dense(256, activation='relu'),
-    tf.keras.layers.Dense(6)  # 6 outputs (positions and orientations)
+    tf.keras.layers.Dense(256, activation='relu'),  
+    tf.keras.layers.Dense(256, activation='relu'),
+    tf.keras.layers.Dense(7)  # 7 outputs (q1 to q7)
 ])
 
-# Compiling the model with accuracy and validation accuracy metrics
+# Compiling the model with mse and accuracy metrics
 model.compile(optimizer='adam', loss='mean_squared_error', metrics=['accuracy'])
 
-# Training the model
-history = model.fit(X_train_scaled, y_train_scaled, epochs=100, batch_size=32, validation_split=0.2)
+# Training the model with higher epochs and smaller batch size
+history = model.fit(X_train_scaled, y_train_scaled, epochs=100, batch_size=128, validation_split=0.2)
 
 # Evaluating the model on test data
 loss, acc = model.evaluate(X_test_scaled, y_test_scaled)
 print("Test loss:", loss)
 print("Test accuracy:", acc)
+
+# Save data
+model.save('model.h5')
 
 # Plotting accuracy graph of the model
 plt.plot(history.history['accuracy'], label='Training')

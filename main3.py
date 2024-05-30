@@ -10,7 +10,7 @@ def readData():
     inputs = []  # Inputs (positions x, y, z and orientations alpha, beta, gamma)
     outputs = []  # Outputs (joint angles q1 to q7)
 
-    with open('panda_data2_30.csv', mode='r') as file:
+    with open('panda_random_data.csv', mode='r') as file:
         reader = csv.reader(file)
         next(reader)  # Skip header
         for row in reader:
@@ -69,7 +69,7 @@ def calculatePositionsAndOrientations(joint_angles):
 
 # Predict joint angles for the first 1000 points
 predicted_angles_all = []
-for i in range(10000):
+for i in range(1000):
     # Predict joint angles
     predicted_angles_scaled = model.predict(X_train_scaled[i:i+1])
     predicted_angles = scaler_y.inverse_transform(predicted_angles_scaled)[0]
