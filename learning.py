@@ -37,10 +37,10 @@ y_test_scaled = scaler_y.transform(y_test)
 
 # Define neural network architecture
 model = tf.keras.Sequential([
-    tf.keras.layers.Dense(256, activation='relu', input_shape=(6,)),   # 6 inputs (positions and orientations)
-    tf.keras.layers.Dense(256, activation='relu'),
-    tf.keras.layers.Dense(256, activation='relu'),  
-    tf.keras.layers.Dense(256, activation='relu'),
+    tf.keras.layers.Dense(512, activation='relu', input_shape=(6,)),   # 6 inputs (positions and orientations)
+    tf.keras.layers.Dense(512, activation='relu'),
+    tf.keras.layers.Dense(512, activation='relu'),  
+    tf.keras.layers.Dense(512, activation='relu'),
     tf.keras.layers.Dense(7)  # 7 outputs (q1 to q7)
 ])
 
@@ -48,7 +48,7 @@ model = tf.keras.Sequential([
 model.compile(optimizer='adam', loss='mean_squared_error', metrics=['accuracy'])
 
 # Training the model with higher epochs and smaller batch size
-history = model.fit(X_train_scaled, y_train_scaled, epochs=100, batch_size=128, validation_split=0.2)
+history = model.fit(X_train_scaled, y_train_scaled, epochs=100, batch_size=32, validation_split=0.2)
 
 # Evaluating the model on test data
 loss, acc = model.evaluate(X_test_scaled, y_test_scaled)

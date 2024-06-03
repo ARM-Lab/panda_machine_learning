@@ -44,10 +44,10 @@ def collect_data(num_samples):
             alfa, beta, gamma = p.getEulerFromQuaternion(orientation)
             
             # Write values to the file
-            writer.writerow([round(q1*math.pi/180,2), round(q2*math.pi/180,2), round(q3*math.pi/180,2), round(q4*math.pi/180,2), round(q5*math.pi/180,2), round(q6*math.pi/180,2), round(q7*math.pi/180,2), round(x,2), round(y,2), round(z,2), round(alfa,2), round(beta,2), round(gamma,2)])
+            writer.writerow([round(x,2), round(y,2), round(z,2), round(alfa,2), round(beta,2), round(gamma,2), round(q1*math.pi/180,2), round(q2*math.pi/180,2), round(q3*math.pi/180,2), round(q4*math.pi/180,2), round(q5*math.pi/180,2), round(q6*math.pi/180,2), round(q7*math.pi/180,2)])
 
     # Disconnect from PyBullet simulation
     p.disconnect()
 
-collect_data(2000000)
-#collect_data(823553)
+#collect_data(1000000)
+collect_data(823553)
