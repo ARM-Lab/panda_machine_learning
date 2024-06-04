@@ -4,6 +4,8 @@ from matplotlib import pyplot as plt
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+from keras.optimizers import Adam
+from keras import regularizers
 import math
 
 # Loading data from CSV file
@@ -14,7 +16,7 @@ def readData():
     with open('panda_random_data.csv', mode='r') as file:
         reader = csv.reader(file)
         next(reader)  # Skip header
-        for row in reader:
+        for row in reader:  
             inputs.append([float(coord) for coord in row[:6]])   # Add inputs (positions and orientations)
             outputs.append([float(angle) for angle in row[6:]])  # Add outputs (joint angles)
     return np.array(inputs), np.array(outputs)
@@ -36,18 +38,19 @@ y_test_scaled = scaler_y.transform(y_test)
 
 # Define neural network architecture
 model = tf.keras.Sequential([
-    tf.keras.layers.Dense(512, activation='relu', input_shape=(6,)),   # 6 inputs (positions and orientations)
-    tf.keras.layers.Dense(512, activation='relu'),
-    tf.keras.layers.Dense(512, activation='relu'),  
-    tf.keras.layers.Dense(512, activation='relu'),
-    tf.keras.layers.Dense(7)  # 7 outputs (q1 to q7)
+    tf.keras.layers.Dense(256, activation='relu', input_shape=(6,), kernel_regularizer=regularizers.l2(0.001)),
+    tf.keras.layers.Dropout(0.2),
+    tf.keras.layers.Dense(256, activation='relu', kernel_regularizer=regularizers.l2(0.001)),
+    tf.keras.layers.Dropout(0.2),
+    tf.keras.layers.Dense(128, activation='relu', kernel_regularizer=regularizers.l2(0.001)),
+    tf.keras.layers.Dense(7)  # Output layer for 7 joint angles
 ])
 
 # Compiling the model with mse and accuracy metrics
-model.compile(optimizer='adam', loss='mean_squared_error', metrics=['accuracy'])
+model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.0001), loss='mean_squared_error',metrics='accuracy')
 
 # Training the model with higher epochs and smaller batch size
-history = model.fit(X_train_scaled, y_train_scaled, epochs=100, batch_size=64, validation_split=0.2)
+history = model.fit(X_train_scaled, y_train_scaled, epochs=200, batch_size=32, validation_split=0.2)
 
 # Evaluating the model on test data
 loss, acc = model.evaluate(X_test_scaled, y_test_scaled)
@@ -55,7 +58,7 @@ print("Test loss:", loss)
 print("Test accuracy:", acc)
 
 # Save data
-model.save('model.h5')
+model.save('model_3M_128batch.h5')
 
 # Plotting accuracy graph of the model
 plt.plot(history.history['accuracy'], label='Training')
